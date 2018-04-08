@@ -35,6 +35,7 @@ fun ExpressionsBasedModel.expression(expression: ExpressionBuilder? = null,
                                      name: String? = null,
                                      lower: Number? = null,
                                      upper: Number? = null,
+                                     level: Number? = null,
                                      weight: Number? = null,
                                      op: Expression.() -> Unit = {}): Expression {
 
@@ -49,6 +50,7 @@ fun ExpressionsBasedModel.expression(expression: ExpressionBuilder? = null,
     expr.op()
     lower?.let { expr.lower(it) }
     upper?.let { expr.upper(it) }
+    level?.let { expr.level(it) }
     weight?.let { expr.weight(it) }
 
     return expr

@@ -1,4 +1,5 @@
 import javafx.application.Application
+import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.geometry.Orientation
 import javafx.scene.control.Button
 import javafx.scene.layout.GridPane
@@ -30,7 +31,6 @@ object GridModel {
 
         expressionsbasedmodel {
 
-
             data class VariableItem(val cell: GridCell, val candidateInt: Int, val variable: Variable)
 
             val variableItems = grid.asSequence().flatMap { cell ->
@@ -42,44 +42,44 @@ object GridModel {
                                 v.cell.value != null && v.cell.value == v.candidateInt -> v.variable.level(1)
                                 else -> v.variable.binary()
                             }
-
                         }
             }.toList()
 
-            data class TripletKey(val i1: Int, val i2: Int, val i3: Int)
 
+            // individual cell
+            variableItems.groupBy { it.cell }.values.forEach { grp ->
+                expression(level=1) {
+                    grp.forEach { set(it.variable, 1) }
+                }
+            }
 
             //entire row
             variableItems.groupBy { TripletKey(it.cell.parentY, it.cell.y, it.candidateInt) }.values.forEach { grp ->
-                expression {
-                    level(1)
+
+                expression(level=1) {
                     grp.forEach { set(it.variable,1) }
                 }
             }
 
             //entire  col
             variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.x, it.candidateInt) }.values.forEach { grp ->
-                expression {
-                    level(1)
+                expression(level=1) {
                     grp.forEach { set(it.variable,1) }
                 }
             }
 
             //entire square
             variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.parentY, it.candidateInt) }.values.forEach { grp ->
-                expression {
-                    level(1)
+                expression(level=1) {
                     grp.forEach { set(it.variable,1) }
                 }
             }
+            this.options.iterations_suffice = 1
 
             minimise().run(::println)
 
-            variableItems.forEach {
-
-                if (it.variable.value.toInt() == 1) {
-                    it.cell.value = it.candidateInt
-                }
+            variableItems.asSequence().filter { it.variable.value.toInt() == 1 }.forEach {
+                it.cell.value = it.candidateInt
             }
         }
     }
@@ -89,9 +89,9 @@ data class GridCell(val parentX: Int, val parentY: Int, val x: Int, val y: Int) 
     var value by property<Int?>()
     fun valueProperty() = getProperty(GridCell::value)
 
-    val allRow by lazy { GridModel.grid.filter { it.y == y && it.parentY == parentY }}
-    val allColumn by lazy { GridModel.grid.filter { it.x == x && it.parentX== parentX }}
-    val allParent by lazy { GridModel.grid.filter { it.parentY == parentY && it.parentX== parentX }}
+    val allRow by lazy { GridModel.grid.filter { it.y == y && it.parentY == parentY }.toSet() }
+    val allColumn by lazy { GridModel.grid.filter { it.x == x && it.parentX== parentX }.toSet() }
+    val allParent by lazy { GridModel.grid.filter { it.parentY == parentY && it.parentX== parentX }.toSet() }
 
     val nextValidValue get() = ((value?:0)..8).asSequence().map { it + 1 }.firstOrNull { candidate ->
         allRow.all { it.value != candidate }
@@ -105,6 +105,7 @@ data class GridCell(val parentX: Int, val parentY: Int, val x: Int, val y: Int) 
 }
 
 
+data class TripletKey(val i1: Int, val i2: Int, val i3: Int)
 
 class SudokuView : View() {
 
@@ -115,6 +116,12 @@ class SudokuView : View() {
 
             button("Solve!") {
                 setOnAction { GridModel.solve() }
+            }
+            button("Reset") {
+                useMaxWidth = true
+                setOnAction {
+                    GridModel.grid.forEach { it.value = null }
+                }
             }
         }
 
@@ -133,7 +140,8 @@ class SudokuView : View() {
                                     val button = Button().apply {
                                         minWidth = 60.0
                                         minHeight = 60.0
-                                        cell.valueProperty().onChange { text = it?.toString() }
+
+                                        textProperty().bind(cell.valueProperty().select { ReadOnlyStringWrapper(it?.toString()) })
 
                                         style { fontSize = 24.px}
 
