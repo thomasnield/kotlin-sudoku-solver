@@ -74,8 +74,8 @@ object GridModel {
                     grp.forEach { set(it.variable,1) }
                 }
             }
-            this.options.iterations_suffice = 1
 
+            options.iterations_suffice = 1
             minimise().run(::println)
 
             variableItems.asSequence().filter { it.variable.value.toInt() == 1 }.forEach {
