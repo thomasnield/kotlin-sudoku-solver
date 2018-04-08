@@ -46,17 +46,10 @@ object GridModel {
                         }
             }.toList()
 
-            data class PairKey(val i1: Int, val i2: Int)
             data class TripletKey(val i1: Int, val i2: Int, val i3: Int)
 
 
             //entire row
-            variableItems.groupBy { PairKey(it.cell.parentY, it.cell.y) }.values.forEach { grp ->
-                expression {
-                    level(9)
-                    grp.forEach { set(it.variable,1) }
-                }
-            }
             variableItems.groupBy { TripletKey(it.cell.parentY, it.cell.y, it.candidateInt) }.values.forEach { grp ->
                 expression {
                     level(1)
@@ -65,12 +58,6 @@ object GridModel {
             }
 
             //entire  col
-            variableItems.groupBy {  PairKey(it.cell.parentX, it.cell.x)  }.values.forEach { grp ->
-                expression {
-                    level(9)
-                    grp.forEach { set(it.variable,1) }
-                }
-            }
             variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.x, it.candidateInt) }.values.forEach { grp ->
                 expression {
                     level(1)
@@ -78,15 +65,7 @@ object GridModel {
                 }
             }
 
-
-
-            variableItems.groupBy { PairKey(it.cell.parentX, it.cell.parentY) }.values.forEach { grp ->
-                expression {
-                    level(9)
-                    grp.forEach { set(it.variable,1) }
-                }
-            }
-
+            //entire square
             variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.parentY, it.candidateInt) }.values.forEach { grp ->
                 expression {
                     level(1)
@@ -97,8 +76,10 @@ object GridModel {
             minimise().run(::println)
 
             variableItems.forEach {
-                if (it.variable.value.toInt() == 1)
+
+                if (it.variable.value.toInt() == 1) {
                     it.cell.value = it.candidateInt
+                }
             }
         }
     }
@@ -109,7 +90,7 @@ data class GridCell(val parentX: Int, val parentY: Int, val x: Int, val y: Int) 
     fun valueProperty() = getProperty(GridCell::value)
 
     val allRow by lazy { GridModel.grid.filter { it.y == y && it.parentY == parentY }}
-    val allColumn by lazy { GridModel.grid.filter { it.y == x && it.parentX== parentX }}
+    val allColumn by lazy { GridModel.grid.filter { it.x == x && it.parentX== parentX }}
     val allParent by lazy { GridModel.grid.filter { it.parentY == parentY && it.parentX== parentX }}
 
     val nextValidValue get() = ((value?:0)..8).asSequence().map { it + 1 }.firstOrNull { candidate ->
