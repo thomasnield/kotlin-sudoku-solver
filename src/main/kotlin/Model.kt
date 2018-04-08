@@ -1,5 +1,4 @@
 import javafx.beans.property.SimpleStringProperty
-import org.ojalgo.optimisation.Optimisation
 import org.ojalgo.optimisation.Variable
 import tornadofx.*
 
@@ -26,13 +25,13 @@ object GridModel {
 
         status.set(null)
 
-  /*      // if no inputs provided, provide a few random as baseline.
+        // if no inputs provided, provide a few random as baseline.
         val setCount = GridModel.grid.count { it.value != null }
 
-        if (setCount < 15) {
-            GridModel.grid.shuffled().take(15 - setCount).forEach { it.increment() }
+        if (setCount < 20) {
+            GridModel.grid.shuffled().take(20 - setCount).forEach { it.increment() }
         }
-*/
+
         // run model
         expressionsbasedmodel {
 
