@@ -3,6 +3,7 @@ import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.geometry.Orientation
 import javafx.scene.control.Button
 import javafx.scene.layout.GridPane
+import javafx.scene.paint.Color
 import tornadofx.*
 
 fun main(args: Array<String>) = Application.launch(MainApp::class.java, *args)
@@ -25,6 +26,7 @@ class SudokuView : View() {
                     GridModel.grid.forEach { it.value = null }
                 }
             }
+            label(GridModel.status)
         }
 
         center = gridpane {

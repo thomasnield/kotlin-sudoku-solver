@@ -1,11 +1,12 @@
-import javafx.application.Application
+import javafx.beans.property.SimpleStringProperty
+import org.ojalgo.optimisation.Optimisation
 import org.ojalgo.optimisation.Variable
 import tornadofx.*
 
 
-
-
 object GridModel {
+
+    val status = SimpleStringProperty()
 
     val grid =  (0..2).asSequence().flatMap { parentX -> (0..2).asSequence().map { parentY -> parentX to parentY } }
             .flatMap { (parentX,parentY) ->
@@ -23,13 +24,15 @@ object GridModel {
 
     fun solve() {
 
-        // if no inputs provided, provide a few random as baseline.
+        status.set(null)
+
+  /*      // if no inputs provided, provide a few random as baseline.
         val setCount = GridModel.grid.count { it.value != null }
 
-        if (setCount < 20) {
-            GridModel.grid.shuffled().take(20 - setCount).forEach { it.increment() }
+        if (setCount < 15) {
+            GridModel.grid.shuffled().take(15 - setCount).forEach { it.increment() }
         }
-
+*/
         // run model
         expressionsbasedmodel {
 
@@ -78,7 +81,9 @@ object GridModel {
             }
 
             options.iterations_suffice = 1
-            minimise().run(::println)
+            minimise().also {
+                status.set(it.state.toString())
+            }
 
             variableItems.asSequence().filter { it.variable.value.toInt() == 1 }.forEach {
                 it.cell.value = it.candidateInt
