@@ -29,6 +29,14 @@ object GridModel {
 
     fun solve() {
 
+        // if no inputs provided, provide a few random as baseline.
+        val setCount = GridModel.grid.count { it.value != null }
+
+        if (setCount < 20) {
+            GridModel.grid.shuffled().take(20 - setCount).forEach { it.increment() }
+        }
+
+        // run model
         expressionsbasedmodel {
 
             data class VariableItem(val cell: GridCell, val candidateInt: Int, val variable: Variable)
