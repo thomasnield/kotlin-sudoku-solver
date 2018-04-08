@@ -37,46 +37,76 @@ object GridModel {
                 (1..9).asSequence()
                         .map { VariableItem(cell,it,variable()) }
                         .onEach { v ->
-                            if (v.cell.value == null) v.variable.binary() else v.variable.level(1)
+                            when {
+                                v.cell.value != null && v.cell.value != v.candidateInt -> v.variable.level(0)
+                                v.cell.value != null && v.cell.value == v.candidateInt -> v.variable.level(1)
+                                else -> v.variable.binary()
+                            }
+
                         }
             }.toList()
 
-            variableItems.groupBy { it.cell.parentRow }.values.forEach { grp ->
+            data class PairKey(val i1: Int, val i2: Int)
+            data class TripletKey(val i1: Int, val i2: Int, val i3: Int)
+
+
+            //entire row
+            variableItems.groupBy { PairKey(it.cell.parentY, it.cell.y) }.values.forEach { grp ->
+                expression {
+                    level(9)
+                    grp.forEach { set(it.variable,1) }
+                }
+            }
+            variableItems.groupBy { TripletKey(it.cell.parentY, it.cell.y, it.candidateInt) }.values.forEach { grp ->
                 expression {
                     level(1)
                     grp.forEach { set(it.variable,1) }
                 }
             }
 
-            variableItems.groupBy { it.cell.parentCol }.values.forEach { grp ->
+            //entire  col
+            variableItems.groupBy {  PairKey(it.cell.parentX, it.cell.x)  }.values.forEach { grp ->
+                expression {
+                    level(9)
+                    grp.forEach { set(it.variable,1) }
+                }
+            }
+            variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.x, it.candidateInt) }.values.forEach { grp ->
                 expression {
                     level(1)
                     grp.forEach { set(it.variable,1) }
                 }
             }
 
-            variableItems.groupBy { it.cell.parentX to it.cell.parentY }.values.forEach { grp ->
+
+
+            variableItems.groupBy { PairKey(it.cell.parentX, it.cell.parentY) }.values.forEach { grp ->
+                expression {
+                    level(9)
+                    grp.forEach { set(it.variable,1) }
+                }
+            }
+
+            variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.parentY, it.candidateInt) }.values.forEach { grp ->
                 expression {
                     level(1)
                     grp.forEach { set(it.variable,1) }
                 }
             }
 
-            solve()
+            minimise().run(::println)
 
             variableItems.forEach {
-                it.cell.value = it.variable.value.toInt()
+                if (it.variable.value.toInt() == 1)
+                    it.cell.value = it.candidateInt
             }
         }
     }
 }
 
-class GridCell(val parentX: Int, val parentY: Int, val x: Int, val y: Int) {
+data class GridCell(val parentX: Int, val parentY: Int, val x: Int, val y: Int) {
     var value by property<Int?>()
     fun valueProperty() = getProperty(GridCell::value)
-
-    val parentRow = (parentY * 3) + y
-    val parentCol = (parentX * 3) + x
 
     val allRow by lazy { GridModel.grid.filter { it.y == y && it.parentY == parentY }}
     val allColumn by lazy { GridModel.grid.filter { it.y == x && it.parentX== parentX }}
