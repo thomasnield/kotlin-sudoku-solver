@@ -21,6 +21,7 @@ dependencies {
     compile 'org.nield:kotlin-statistics:1.0.0'
     compile 'no.tornado:tornadofx:1.7.15'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile 'org.ojalgo:ojalgo:45.0.0'
 }
 
 compileKotlin {
