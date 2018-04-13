@@ -37,6 +37,8 @@ object GridModel {
         // run model
         expressionsbasedmodel {
 
+            // A VariableItem is used to pair a GridCell to each candidate number 1-9, and it's corresponding binary variable to be optimized
+
             data class VariableItem(val cell: GridCell, val candidateInt: Int, val variable: Variable)
 
             val variableItems = grid.asSequence().flatMap { cell ->
