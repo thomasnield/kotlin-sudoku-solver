@@ -5,15 +5,17 @@ import tornadofx.*
 
 object GridModel {
 
+    // displays status message on success of solver
     val status = SimpleStringProperty()
 
+    // generates the entire Sudoku grid of GridCells
     val grid =  (0..2).asSequence().flatMap { parentX -> (0..2).asSequence().map { parentY -> parentX to parentY } }
             .flatMap { (parentX,parentY) ->
                 (0..2).asSequence().flatMap { x -> (0..2).asSequence().map { y -> x to y } }
                         .map { (x,y) -> GridCell(parentX,parentY,x,y) }
             }.toList()
 
-
+    // retrieves a GridCell
     fun cellFor(parentX: Int, parentY: Int, x: Int, y: Int) = grid.first {
                 it.parentX == parentX &&
                 it.parentY == parentY  &&
@@ -50,14 +52,14 @@ object GridModel {
             }.toList()
 
 
-            // individual cell
+            // constrain individual cell so its variables only add to 1
             variableItems.groupBy { it.cell }.values.forEach { grp ->
                 expression(level=1) {
                     grp.forEach { set(it.variable, 1) }
                 }
             }
 
-            //entire row
+            // constrain each row so variables of each number only add to 1
             variableItems.groupBy { TripletKey(it.cell.parentY, it.cell.y, it.candidateInt) }.values.forEach { grp ->
 
                 expression(level=1) {
@@ -65,25 +67,29 @@ object GridModel {
                 }
             }
 
-            //entire  col
+            // constrain each column so variables of each number only add to 1
             variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.x, it.candidateInt) }.values.forEach { grp ->
                 expression(level=1) {
                     grp.forEach { set(it.variable,1) }
                 }
             }
 
-            //entire square
+            // constrain each square so variables of each number only add to 1
             variableItems.groupBy { TripletKey(it.cell.parentX, it.cell.parentY, it.candidateInt) }.values.forEach { grp ->
                 expression(level=1) {
                     grp.forEach { set(it.variable,1) }
                 }
             }
 
+            // minimize number of solutions to seek
             options.iterations_suffice = 1
+
+            // no optimization objective, but just call minimize()
             minimise().also {
                 status.set(it.state.toString())
             }
 
+            // set optimized variables back to GridCells for display
             variableItems.asSequence().filter { it.variable.value.toInt() == 1 }.forEach {
                 it.cell.value = it.candidateInt
             }

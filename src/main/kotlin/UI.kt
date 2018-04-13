@@ -29,6 +29,7 @@ class SudokuView : View() {
             label(GridModel.status)
         }
 
+        // build GridPane view
         center = gridpane {
 
             (0..2).asSequence().flatMap { parentX -> (0..2).asSequence().map { parentY -> parentX to parentY } }
