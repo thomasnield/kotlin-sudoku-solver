@@ -41,8 +41,8 @@ enum class Solver {
         override fun solve() {
 
             // Order Sudoku cells by count of how many candidate values they have left
-            // Starting with the most constrains cells will greatly reduce the search space
-            // Fixed cells will have 0 candidates
+            // Starting with the most constrained cells (with few possible values left) will greatly reduce the search space
+            // Fixed cells will have 0 candidates and will be processed first
             val sortedByCandidateCount = GridModel.grid.asSequence()
                     .sortedBy { it.candidatesLeft.count() }
                     .toList()
