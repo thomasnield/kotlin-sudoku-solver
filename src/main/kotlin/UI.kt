@@ -3,6 +3,8 @@ import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.geometry.Orientation
 import javafx.scene.control.Button
 import javafx.scene.layout.GridPane
+import javafx.scene.paint.Color
+import javafx.scene.text.FontWeight
 import tornadofx.*
 
 fun main(args: Array<String>) = Application.launch(MainApp::class.java, *args)
@@ -13,20 +15,46 @@ class SudokuView : View() {
 
     override val root = borderpane {
 
-        left = toolbar {
-            orientation = Orientation.VERTICAL
+        title = "Sudoku Solver"
 
-            button("Solve!") {
-                useMaxWidth = true
-                setOnAction { GridModel.solve() }
-            }
-            button("Reset") {
-                useMaxWidth = true
-                setOnAction {
-                    GridModel.grid.forEach { it.value = null }
+        left = form {
+
+            fieldset {
+                field {
+                    label("ALGORITHM") {
+                        style {
+                            fontWeight = FontWeight.BOLD
+                            textFill = Color.RED
+                        }
+                    }
+                }
+                field {
+                    combobox(property = GridModel.selectedSolverProperty) {
+                        items.setAll(Solver.values().asList())
+                    }
                 }
             }
-            label(GridModel.status)
+
+            fieldset {
+                field {
+                    button("Solve!") {
+                        useMaxWidth = true
+                        setOnAction { GridModel.solve() }
+                    }
+                }
+                field {
+                    button("Reset") {
+                        useMaxWidth = true
+                        setOnAction {
+                            GridModel.grid.forEach { it.value = null }
+                        }
+                    }
+                }
+                field {
+                    label(GridModel.statusProperty)
+                }
+            }
+
         }
 
         // build GridPane view

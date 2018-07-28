@@ -1,7 +1,7 @@
 
 
 buildscript {
-    ext.kotlin_version = '1.2.31'
+    ext.kotlin_version = '1.2.51'
 
     repositories {
         mavenCentral()
@@ -21,6 +21,7 @@ dependencies {
     compile 'no.tornado:tornadofx:1.7.15'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile 'org.ojalgo:ojalgo:45.0.0'
+    compile 'org.ojalgo:okalgo:0.0.2'
 }
 
 compileKotlin {
