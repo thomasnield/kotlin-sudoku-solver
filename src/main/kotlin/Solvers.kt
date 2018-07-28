@@ -54,7 +54,7 @@ enum class Solver {
 
                 val fixedValue = nextCell.value
 
-                // we want to explore possible values 0..9 unless this cell is fixed already
+                // we want to explore possible values 1..9 unless this cell is fixed already
                 val range = if (fixedValue == null) (1..9) else (fixedValue..fixedValue)
 
                 for (candidateValue in range) {
