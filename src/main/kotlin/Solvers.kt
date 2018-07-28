@@ -1,3 +1,4 @@
+import javafx.application.Platform
 import org.ojalgo.okalgo.expression
 import org.ojalgo.okalgo.expressionsbasedmodel
 import org.ojalgo.okalgo.variable
@@ -33,7 +34,11 @@ enum class Solver {
             val isSolution = traverseBackwards.count() == 81 && constraintsMet
 
             fun applyToCell() {
-                gridCell.value = selectedValue
+                Platform.runLater { gridCell.value = selectedValue }
+            }
+
+            init {
+                if (isContinuable) applyToCell()
             }
 
         }
@@ -47,12 +52,17 @@ enum class Solver {
                     .sortedBy { it.candidatesLeft.count() }
                     .toList()
 
+            // hold onto fixed values snapshot as they are going to mutate during animation
+            val fixedCellValues =  GridModel.grid.asSequence().map { it to it.value }
+                    .filter { it.second != null }
+                    .toMap()
+
             // this is a recursive function for exploring nodes in a branch-and-bound like tree
             fun traverse(index: Int, currentBranch: GridCellBranch): GridCellBranch? {
 
                 val nextCell = sortedByCandidateCount[index+1]
 
-                val fixedValue = nextCell.value
+                val fixedValue = fixedCellValues[nextCell]
 
                 // we want to explore possible values 1..9 unless this cell is fixed already
                 val range = if (fixedValue == null) (1..9) else (fixedValue..fixedValue)
@@ -83,7 +93,7 @@ enum class Solver {
 
             solution?.traverseBackwards?.forEach { it.applyToCell() }
 
-            GridModel.status = if (solution == null) "INFEASIBLE" else "FEASIBLE"
+            Platform.runLater { GridModel.status = if (solution == null) "INFEASIBLE" else "FEASIBLE" }
         }
     },
     OJALGO {

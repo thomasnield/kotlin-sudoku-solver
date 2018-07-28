@@ -74,12 +74,16 @@ class SudokuView : View() {
                                         minWidth = 60.0
                                         minHeight = 60.0
 
-                                        textProperty().bind(cell.valueProperty().select { ReadOnlyStringWrapper(it?.toString()) })
+                                        cell.valueProperty().onChange {
+                                            text = it?.toString()
+                                            if (it == null) textFill = Color.BLACK
+                                        }
 
                                         style { fontSize = 24.px}
 
                                         setOnAction {
                                             cell.increment()
+                                            textFill = Color.RED
                                         }
                                     }
 

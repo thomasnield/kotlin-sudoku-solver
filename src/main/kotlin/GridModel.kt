@@ -29,10 +29,11 @@ object GridModel {
         }
 
     fun solve() {
-
         status = null
 
-        selecteSolver.solve()
+        runAsync {
+            selecteSolver.solve()
+        }
     }
 }
 
