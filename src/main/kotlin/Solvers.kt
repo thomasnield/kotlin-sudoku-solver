@@ -122,7 +122,8 @@ enum class Solver {
 
                 // constrain individual cell so its variables only add to 1
                 variableItems.groupBy { it.cell }.values.forEach { grp ->
-                    expression(lower=1, upper =1) {
+                    expression {
+                        level(1)
                         grp.forEach { set(it.variable, 1) }
                     }
                 }
@@ -130,21 +131,24 @@ enum class Solver {
                 // constrain each row so variables of each number only add to 1
                 variableItems.groupBy { TripletKey(it.cell.squareY, it.cell.y, it.candidateInt) }.values.forEach { grp ->
 
-                    expression(lower=1, upper =1) {
+                    expression {
+                        level(1)
                         grp.forEach { set(it.variable,1) }
                     }
                 }
 
                 // constrain each column so variables of each number only add to 1
                 variableItems.groupBy { TripletKey(it.cell.squareX, it.cell.x, it.candidateInt) }.values.forEach { grp ->
-                    expression(lower=1, upper =1) {
+                    expression {
+                        level(1)
                         grp.forEach { set(it.variable,1) }
                     }
                 }
 
                 // constrain each square so variables of each number only add to 1
                 variableItems.groupBy { TripletKey(it.cell.squareX, it.cell.squareY, it.candidateInt) }.values.forEach { grp ->
-                    expression(lower=1, upper =1) {
+                    expression {
+                        level(1)
                         grp.forEach { set(it.variable,1) }
                     }
                 }
@@ -154,12 +158,12 @@ enum class Solver {
 
                 // no optimization objective, but just call minimize()
                 minimise().also {
-                    GridModel.statusProperty.set(it.state.toString())
+                    Platform.runLater { GridModel.statusProperty.set(it.state.toString()) }
                 }
 
                 // set optimized variables back to GridCells for display
                 variableItems.asSequence().filter { it.variable.value.toInt() == 1 }.forEach {
-                    it.cell.value = it.candidateInt
+                    Platform.runLater { it.cell.value = it.candidateInt }
                 }
             }
         }

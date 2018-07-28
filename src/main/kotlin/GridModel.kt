@@ -31,9 +31,8 @@ object GridModel {
     fun solve() {
         status = null
 
-        runAsync {
-            selecteSolver.solve()
-        }
+        runAsync { selecteSolver.solve() }
+
     }
 }
 
