@@ -46,8 +46,8 @@ enum class Solver {
         override fun solve() {
 
             // Order Sudoku cells by count of how many candidate values they have left
-            // Starting with the most constrained cells (with few possible values left) will greatly reduce the search space
-            // Fixed cells will have 0 candidates and will be processed first
+            // Starting with the most constrained cells (with fewest possible values left) will greatly reduce the search space
+            // Fixed cells will have only 1 candidate and will be processed first
             val sortedByCandidateCount = GridModel.grid.asSequence()
                     .sortedBy { it.candidatesLeft.count() }
                     .toList()
@@ -57,7 +57,7 @@ enum class Solver {
                     .filter { it.second != null }
                     .toMap()
 
-            // this is a recursive function for exploring nodes in a branch-and-bound like tree
+            // this is a recursive function for exploring nodes in a branch-and-bound tree
             fun traverse(index: Int, currentBranch: GridCellBranch): GridCellBranch? {
 
                 val nextCell = sortedByCandidateCount[index+1]
@@ -65,6 +65,7 @@ enum class Solver {
                 val fixedValue = fixedCellValues[nextCell]
 
                 // we want to explore possible values 1..9 unless this cell is fixed already
+                // infeasible values should terminate the branch
                 val range = if (fixedValue == null) (1..9) else (fixedValue..fixedValue)
 
                 for (candidateValue in range) {
@@ -84,7 +85,7 @@ enum class Solver {
                 return null
             }
 
-            // start with the first Sudoku cell and set it as the seed
+            // start with the first sorted Sudoku cell and set it as the seed
             val seed = sortedByCandidateCount.first()
                     .let { GridCellBranch(it.value?:1, it) }
 
