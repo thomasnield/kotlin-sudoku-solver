@@ -21,18 +21,23 @@ enum class Solver {
             // traverses this entire branch backwards, revealing the solution so far
             val traverseBackwards =  generateSequence(this) { it.previous }.toList()
 
+            // Be able to retrieve a given row, column, or square of assigned values from this branch
             val allRow  = traverseBackwards.filter { it.y == y && it.squareY == squareY }
             val allColumn = traverseBackwards.filter { it.x == x && it.squareX == squareX }
             val allSquare = traverseBackwards.filter { it.squareY == squareY && it.squareX== squareX }
 
+            // Determines whether our current branch does not break any Sudoku rules
             val constraintsMet = allRow.filter { it.selectedValue == selectedValue }.count() <= 1
                     && allColumn.filter { it.selectedValue == selectedValue }.count() <= 1
                     && allSquare.filter { it.selectedValue == selectedValue }.count() <= 1
 
+            // Determines whether this branch should continue to be traversed
             val isContinuable =  constraintsMet && traverseBackwards.count() < 81
 
+            // Determines if this branch is a full solution
             val isSolution = traverseBackwards.count() == 81 && constraintsMet
 
+            // Animations put back on the game board
             fun applyToCell() {
                 Platform.runLater { gridCell.value = selectedValue }
             }
@@ -91,6 +96,7 @@ enum class Solver {
             // recursively traverse from the seed and get a solution
             val solution = traverse(0, seed)
 
+            // apply solution back to game baoard
             solution?.traverseBackwards?.forEach { it.applyToCell() }
 
             Platform.runLater { GridModel.status = if (solution == null) "INFEASIBLE" else "FEASIBLE" }
